@@ -33,7 +33,7 @@ body {
 }
 h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#25D366; }
 h3 { margin-bottom:8px; }
-input, select, textarea {
+input, select, textarea, button {
     width:100%;
     padding:14px;
     margin:6px 0;
@@ -99,6 +99,7 @@ button:hover { background:#1ebe57; }
         <h3>📝 Observações Opcionais</h3>
         <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
 
+        <button type="button" id="btnCalcular">Calcular Valor da Entrega</button>
         <span id="valorEntrega">Valor da entrega: R$0,00</span>
         <span id="avisoEndereco"></span>
 
@@ -116,9 +117,7 @@ function initAutocomplete() {
     autocompleteColeta = new google.maps.places.Autocomplete(coletaInput, { types: ['geocode'] });
     autocompleteEntrega = new google.maps.places.Autocomplete(entregaInput, { types: ['geocode'] });
 
-    autocompleteColeta.addListener('place_changed', calcularValorSeguro);
-    autocompleteEntrega.addListener('place_changed', calcularValorSeguro);
-
+    // Limpa aviso e valor enquanto digita
     coletaInput.addEventListener('input', () => {
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
         document.getElementById('avisoEndereco').innerText = '';
@@ -129,14 +128,14 @@ function initAutocomplete() {
     });
 }
 
-function calcularValorSeguro() {
+// Função para calcular o valor quando o usuário clicar
+function calcularValorEntrega() {
     const coletaPlace = autocompleteColeta.getPlace();
     const entregaPlace = autocompleteEntrega.getPlace();
 
-    // Proteção contra campos inválidos
     if (!coletaPlace || !coletaPlace.geometry || !entregaPlace || !entregaPlace.geometry) {
+        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão válida para os dois endereços!';
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
-        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão válida!';
         return;
     }
 
@@ -155,10 +154,12 @@ function calcularValorSeguro() {
             document.getElementById('valorEntrega').innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
         } else {
             document.getElementById('avisoEndereco').innerText = 'Não foi possível calcular a distância.';
+            document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
         }
     });
 }
 
+// Envio do pedido para WhatsApp
 document.getElementById("pedidoForm").addEventListener("submit", function(e){
     e.preventDefault();
 
@@ -195,6 +196,8 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
     let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
     window.open(url, "_blank");
 });
+
+document.getElementById("btnCalcular").addEventListener("click", calcularValorEntrega);
 
 initAutocomplete();
 </script>
