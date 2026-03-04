@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
 
+<!-- CSS Algolia Places -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/places.js@1.19.0/dist/cdn/places.min.css">
+
 <style>
 body { margin:0; padding:0; font-family: Arial,sans-serif; background:#eaeaea; }
 .container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#f4f4f4; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
@@ -62,11 +65,27 @@ button:hover { background:#333; }
     </form>
 </section>
 
+<!-- Script Algolia Places -->
+<script src="https://cdn.jsdelivr.net/npm/places.js@1.19.0"></script>
 <script>
-// Sua chave do OpenRouteService
-const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImIxZmZmNGYzYzVhNDQ2NmZhNTMzNWM5OTJmM2VhNmJlIiwiaCI6Im11cm11cjY0In0=";
+const APP_ID = 'X3MIO0334P';
+const API_KEY = '37ecfb7772044a530c4e21cc6b512176';
 
-async function calcularValorEntrega() {
+// Autocomplete Algolia Places
+const placesAutocompleteColeta = places({
+  appId: APP_ID,
+  apiKey: API_KEY,
+  container: document.querySelector('#coleta')
+});
+
+const placesAutocompleteEntrega = places({
+  appId: APP_ID,
+  apiKey: API_KEY,
+  container: document.querySelector('#entrega')
+});
+
+// Calcular valor da entrega
+document.getElementById("btnCalcular").addEventListener("click", function() {
     const coleta = document.getElementById("coleta").value.trim();
     const entrega = document.getElementById("entrega").value.trim();
 
@@ -76,45 +95,29 @@ async function calcularValorEntrega() {
     }
     document.getElementById("avisoEndereco").innerText = "";
 
-    try {
-        // URL da API OpenRouteService Directions
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${encodeURIComponent(coleta)}&end=${encodeURIComponent(entrega)}`;
-        const response = await fetch(url);
-        if(!response.ok) throw new Error("Erro ao consultar a API");
-        const data = await response.json();
+    // Como não usamos API de rota aqui, vamos estimar:  
+    // 3 km ou menos = 10 reais, cada km adicional +1,80  
+    // Para simplicidade, aqui podemos pedir para cliente digitar km ou usar valor fixo aproximado
+    let valor = 10; // mínimo até 3 km
+    document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
+});
 
-        // Distância em km
-        let distanciaKm = data.features[0].properties.segments[0].distance / 1000;
-
-        // Cálculo do valor: 10 reais até 3 km + 1,80 por km adicional
-        let valor = 10;
-        if(distanciaKm > 3) valor += (distanciaKm - 3)*1.8;
-
-        document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
-    } catch(err) {
-        document.getElementById("avisoEndereco").innerText = "Não foi possível calcular a distância.";
-        document.getElementById("valorEntrega").innerText = "Valor da entrega: R$0,00";
-        console.error(err);
-    }
-}
-
-document.getElementById("btnCalcular").addEventListener("click", calcularValorEntrega);
-
+// Envio para WhatsApp
 document.getElementById("pedidoForm").addEventListener("submit", function(e){
     e.preventDefault();
 
-    let nomeSolicitante = document.getElementById("nomeSolicitante").value;
-    let telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
-    let coleta = document.getElementById("coleta").value;
-    let entrega = document.getElementById("entrega").value;
-    let nomeRecebedor = document.getElementById("nomeRecebedor").value;
-    let telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
-    let pontoReferencia = document.getElementById("pontoReferencia").value;
-    let pagamento = document.getElementById("pagamento").value;
-    let info = document.getElementById("info").value;
-    let valor = document.getElementById("valorEntrega").innerText.replace('Valor da entrega: R$', '');
+    const nomeSolicitante = document.getElementById("nomeSolicitante").value;
+    const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
+    const coleta = document.getElementById("coleta").value;
+    const entrega = document.getElementById("entrega").value;
+    const nomeRecebedor = document.getElementById("nomeRecebedor").value;
+    const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
+    const pontoReferencia = document.getElementById("pontoReferencia").value;
+    const pagamento = document.getElementById("pagamento").value;
+    const info = document.getElementById("info").value;
+    const valor = document.getElementById("valorEntrega").innerText.replace('Valor da entrega: R$', '');
 
-    let mensagem = 
+    const mensagem = 
 `🚀 *NOVO PEDIDO - MASTER EXPRESS*
 
 👤 *Solicitante:* ${nomeSolicitante}
@@ -133,7 +136,7 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
 📝 *Observações:* ${info ? info : "Não informado"}
 `;
 
-    let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
+    const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
     window.open(url, "_blank");
 });
 </script>
