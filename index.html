@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
 
-<!-- Google Maps API com a sua chave -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJz-vLi0bfQ3_yIbGS9e_rfujh6LFgW5Q&libraries=places"></script>
-
 <style>
 body { margin:0; padding:0; font-family: Arial,sans-serif; background:#eaeaea; }
 .container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#f4f4f4; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
@@ -35,15 +32,15 @@ button:hover { background:#333; }
         <input type="text" id="telefoneSolicitante" placeholder="Telefone do solicitante" required>
 
         <h3>📍 Endereço de Coleta</h3>
-        <input type="text" id="coleta" placeholder="Endereço completo da coleta" required>
+        <input type="text" id="coleta" placeholder="Digite o endereço completo de coleta" required>
 
         <h3>📦 Endereço de Entrega</h3>
-        <input type="text" id="entrega" placeholder="Endereço completo da entrega" required>
+        <input type="text" id="entrega" placeholder="Digite o endereço completo de entrega" required>
 
         <h3>👥 Dados de Quem Vai Receber</h3>
         <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required>
         <input type="text" id="telefoneRecebedor" placeholder="Telefone de quem vai receber" required>
-        <input type="text" id="pontoReferencia" placeholder="Ponto de referência (ex.: próximo ao mercado)" required>
+        <input type="text" id="pontoReferencia" placeholder="Ponto de referência" required>
 
         <h3>💰 Pagamento</h3>
         <select id="pagamento" required>
@@ -66,49 +63,39 @@ button:hover { background:#333; }
 </section>
 
 <script>
-let autocompleteColeta, autocompleteEntrega;
+// Sua chave do OpenRouteService
+const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImIxZmZmNGYzYzVhNDQ2NmZhNTMzNWM5OTJmM2VhNmJlIiwiaCI6Im11cm11cjY0In0=";
 
-function initAutocomplete() {
-    autocompleteColeta = new google.maps.places.Autocomplete(document.getElementById('coleta'), { types: ['geocode'] });
-    autocompleteEntrega = new google.maps.places.Autocomplete(document.getElementById('entrega'), { types: ['geocode'] });
+async function calcularValorEntrega() {
+    const coleta = document.getElementById("coleta").value.trim();
+    const entrega = document.getElementById("entrega").value.trim();
 
-    document.getElementById('coleta').addEventListener('input', ()=>{ 
-        document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; 
-        document.getElementById('avisoEndereco').innerText=''; 
-    });
-    document.getElementById('entrega').addEventListener('input', ()=>{ 
-        document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; 
-        document.getElementById('avisoEndereco').innerText=''; 
-    });
-}
-
-function calcularValorEntrega() {
-    const coletaPlace = autocompleteColeta.getPlace();
-    const entregaPlace = autocompleteEntrega.getPlace();
-
-    if(!coletaPlace || !coletaPlace.geometry || !entregaPlace || !entregaPlace.geometry){
-        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão válida para os dois endereços!';
-        document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
+    if(!coleta || !entrega){
+        document.getElementById("avisoEndereco").innerText = "Por favor, preencha ambos os endereços!";
         return;
     }
-    document.getElementById('avisoEndereco').innerText = '';
+    document.getElementById("avisoEndereco").innerText = "";
 
-    const service = new google.maps.DistanceMatrixService();
-    service.getDistanceMatrix({
-        origins: [coletaPlace.formatted_address],
-        destinations: [entregaPlace.formatted_address],
-        travelMode: 'DRIVING'
-    }, function(response, status){
-        if(status==='OK'){
-            let distanciaKm = response.rows[0].elements[0].distance.value/1000;
-            let valor = 10; 
-            if(distanciaKm>3) valor += (distanciaKm-3)*1.8;
-            document.getElementById('valorEntrega').innerText=`Valor da entrega: R$${valor.toFixed(2)}`;
-        } else {
-            document.getElementById('avisoEndereco').innerText='Não foi possível calcular a distância.';
-            document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00';
-        }
-    });
+    try {
+        // URL da API OpenRouteService Directions
+        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${encodeURIComponent(coleta)}&end=${encodeURIComponent(entrega)}`;
+        const response = await fetch(url);
+        if(!response.ok) throw new Error("Erro ao consultar a API");
+        const data = await response.json();
+
+        // Distância em km
+        let distanciaKm = data.features[0].properties.segments[0].distance / 1000;
+
+        // Cálculo do valor: 10 reais até 3 km + 1,80 por km adicional
+        let valor = 10;
+        if(distanciaKm > 3) valor += (distanciaKm - 3)*1.8;
+
+        document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
+    } catch(err) {
+        document.getElementById("avisoEndereco").innerText = "Não foi possível calcular a distância.";
+        document.getElementById("valorEntrega").innerText = "Valor da entrega: R$0,00";
+        console.error(err);
+    }
 }
 
 document.getElementById("btnCalcular").addEventListener("click", calcularValorEntrega);
@@ -149,8 +136,6 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
     let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
     window.open(url, "_blank");
 });
-
-initAutocomplete();
 </script>
 
 </body>
