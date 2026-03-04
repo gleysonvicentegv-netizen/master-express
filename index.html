@@ -4,23 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
-
-<!-- CSS Algolia Places -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/places.js@1.19.0/dist/cdn/places.min.css">
-
 <style>
-body { margin:0; padding:0; font-family: Arial,sans-serif; background:#eaeaea; }
-.container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#f4f4f4; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
+body { margin:0; padding:0; font-family: Arial,sans-serif; background:#f0f8ff; }
+.container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#d1e7dd; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
 .container img { width:160px; display:block; margin:0 auto 25px auto; }
 h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#333; }
 h3 { margin-bottom:8px; }
 input, select, textarea, button { width:100%; padding:14px; margin:6px 0; border-radius:12px; border:1px solid #ccc; box-sizing:border-box; font-size:16px; }
 textarea { resize:none; }
-button { width:100%; padding:16px; margin-top:12px; background:#555; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
-button:hover { background:#333; }
-#valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#25D366; font-size:18px; }
+button { width:100%; padding:16px; margin-top:12px; background:#0d6efd; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
+button:hover { background:#084298; }
+#valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#198754; font-size:18px; }
 #avisoEndereco { color:#FF0000; font-weight:bold; margin-top:8px; display:block; }
-@media (max-width: 400px) { h2 { font-size:24px; } input, select, textarea, button { padding:12px; font-size:15px; } }
 </style>
 </head>
 <body>
@@ -40,6 +35,9 @@ button:hover { background:#333; }
         <h3>📦 Endereço de Entrega</h3>
         <input type="text" id="entrega" placeholder="Digite o endereço completo de entrega" required>
 
+        <h3>📏 Distância (km)</h3>
+        <input type="number" id="distancia" placeholder="Informe a distância aproximada em km" required min="0">
+
         <h3>👥 Dados de Quem Vai Receber</h3>
         <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required>
         <input type="text" id="telefoneRecebedor" placeholder="Telefone de quem vai receber" required>
@@ -57,6 +55,7 @@ button:hover { background:#333; }
         <h3>📝 Observações Opcionais</h3>
         <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
 
+        <button type="button" id="btnCalcular">Calcular Valor da Entrega</button>
         <span id="valorEntrega">Valor da entrega: R$0,00</span>
         <span id="avisoEndereco"></span>
 
@@ -64,82 +63,43 @@ button:hover { background:#333; }
     </form>
 </section>
 
-<!-- Script Algolia Places -->
-<script src="https://cdn.jsdelivr.net/npm/places.js@1.19.0"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-  const APP_ID = 'X3MIO0334P';
-  const API_KEY = '37ecfb7772044a530c4e21cc6b512176';
+    function calcularValor(distancia){
+        let valor = 10; // mínimo até 3 km
+        if(distancia > 3) valor += (distancia - 3)*1.8;
+        return valor.toFixed(2);
+    }
 
-  let latColeta = null, lngColeta = null;
-  let latEntrega = null, lngEntrega = null;
+    document.getElementById("btnCalcular").addEventListener("click", function(){
+        const distancia = parseFloat(document.getElementById("distancia").value);
+        if(isNaN(distancia) || distancia < 0){
+            document.getElementById("avisoEndereco").innerText = "Por favor, informe uma distância válida!";
+            document.getElementById("valorEntrega").innerText = "Valor da entrega: R$0,00";
+            return;
+        }
+        document.getElementById("avisoEndereco").innerText = "";
+        const valor = calcularValor(distancia);
+        document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor}`;
+    });
 
-  const coletaInput = document.querySelector('#coleta');
-  const entregaInput = document.querySelector('#entrega');
+    document.getElementById("pedidoForm").addEventListener("submit", function(e){
+        e.preventDefault();
 
-  // Autocomplete Algolia Places
-  const placesAutocompleteColeta = places({
-    appId: APP_ID,
-    apiKey: API_KEY,
-    container: coletaInput
-  }).on('change', function(e) {
-      latColeta = e.suggestion.latlng.lat;
-      lngColeta = e.suggestion.latlng.lng;
-      atualizarValor();
-  });
+        const nomeSolicitante = document.getElementById("nomeSolicitante").value;
+        const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
+        const coleta = document.getElementById("coleta").value;
+        const entrega = document.getElementById("entrega").value;
+        const distancia = document.getElementById("distancia").value;
+        const nomeRecebedor = document.getElementById("nomeRecebedor").value;
+        const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
+        const pontoReferencia = document.getElementById("pontoReferencia").value;
+        const pagamento = document.getElementById("pagamento").value;
+        const info = document.getElementById("info").value;
+        const valor = calcularValor(parseFloat(distancia));
 
-  const placesAutocompleteEntrega = places({
-    appId: APP_ID,
-    apiKey: API_KEY,
-    container: entregaInput
-  }).on('change', function(e) {
-      latEntrega = e.suggestion.latlng.lat;
-      lngEntrega = e.suggestion.latlng.lng;
-      atualizarValor();
-  });
-
-  function calcularDistancia(lat1, lng1, lat2, lng2){
-      const R = 6371; // km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-                Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180) *
-                Math.sin(dLng/2)*Math.sin(dLng/2);
-      const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-  }
-
-  function atualizarValor(){
-      if(latColeta !== null && latEntrega !== null){
-          let distancia = calcularDistancia(latColeta, lngColeta, latEntrega, lngEntrega);
-          let valor = 10; // mínimo até 3 km
-          if(distancia > 3) valor += (distancia - 3)*1.8;
-          document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
-      }
-  }
-
-  // Envio para WhatsApp
-  document.getElementById("pedidoForm").addEventListener("submit", function(e){
-      e.preventDefault();
-
-      const nomeSolicitante = document.getElementById("nomeSolicitante").value;
-      const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
-      const coleta = coletaInput.value;
-      const entrega = entregaInput.value;
-      const nomeRecebedor = document.getElementById("nomeRecebedor").value;
-      const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
-      const pontoReferencia = document.getElementById("pontoReferencia").value;
-      const pagamento = document.getElementById("pagamento").value;
-      const info = document.getElementById("info").value;
-      const valor = document.getElementById("valorEntrega").innerText.replace('Valor da entrega: R$', '');
-
-      if(!latColeta || !latEntrega){
-          document.getElementById("avisoEndereco").innerText = "Por favor, selecione os endereços usando o autocomplete!";
-          return;
-      }
-
-      const mensagem = 
+        const mensagem = 
 `🚀 *NOVO PEDIDO - MASTER EXPRESS*
 
 👤 *Solicitante:* ${nomeSolicitante}
@@ -147,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 📍 *Coleta:* ${coleta}
 📦 *Entrega:* ${entrega}
+📏 *Distância:* ${distancia} km
 
 👥 *Recebedor:* ${nomeRecebedor}
 📞 *Telefone do Recebedor:* ${telefoneRecebedor}
@@ -158,9 +119,9 @@ document.addEventListener("DOMContentLoaded", function() {
 📝 *Observações:* ${info ? info : "Não informado"}
 `;
 
-      const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
-      window.open(url, "_blank");
-  });
+        const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
+        window.open(url, "_blank");
+    });
 
 });
 </script>
