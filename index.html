@@ -58,6 +58,7 @@ button {
 }
 button:hover { background:#1ebe57; }
 #valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#25D366; font-size:18px; }
+#avisoEndereco { color:#FF0000; font-weight:bold; margin-top:8px; display:block; }
 @media (max-width: 400px) {
     h2 { font-size:24px; }
     input, select, textarea, button { padding:12px; font-size:15px; }
@@ -99,6 +100,7 @@ button:hover { background:#1ebe57; }
         <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
 
         <span id="valorEntrega">Valor da entrega: R$0,00</span>
+        <span id="avisoEndereco"></span>
 
         <button type="submit">Enviar Pedido via WhatsApp</button>
     </form>
@@ -120,9 +122,11 @@ function initAutocomplete() {
     // Permitir digitar livremente sem travar
     coletaInput.addEventListener('input', () => {
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
+        document.getElementById('avisoEndereco').innerText = '';
     });
     entregaInput.addEventListener('input', () => {
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
+        document.getElementById('avisoEndereco').innerText = '';
     });
 }
 
@@ -130,8 +134,12 @@ function calcularValor() {
     const coletaPlace = autocompleteColeta.getPlace();
     const entregaPlace = autocompleteEntrega.getPlace();
 
-    // Se algum endereço não estiver selecionado corretamente, não calcula
-    if (!coletaPlace || !entregaPlace || !coletaPlace.geometry || !entregaPlace.geometry) return;
+    if (!coletaPlace || !entregaPlace || !coletaPlace.geometry || !entregaPlace.geometry) {
+        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão de endereço válida';
+        return;
+    }
+
+    document.getElementById('avisoEndereco').innerText = '';
 
     const service = new google.maps.DistanceMatrixService();
     service.getDistanceMatrix({
@@ -149,6 +157,8 @@ function calcularValor() {
             }
             valor = valor.toFixed(2);
             document.getElementById('valorEntrega').innerText = `Valor da entrega: R$${valor}`;
+        } else {
+            document.getElementById('avisoEndereco').innerText = 'Não foi possível calcular a distância. Verifique os endereços.';
         }
     });
 }
