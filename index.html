@@ -116,10 +116,9 @@ function initAutocomplete() {
     autocompleteColeta = new google.maps.places.Autocomplete(coletaInput, { types: ['geocode'] });
     autocompleteEntrega = new google.maps.places.Autocomplete(entregaInput, { types: ['geocode'] });
 
-    autocompleteColeta.addListener('place_changed', calcularValor);
-    autocompleteEntrega.addListener('place_changed', calcularValor);
+    autocompleteColeta.addListener('place_changed', calcularValorSeguro);
+    autocompleteEntrega.addListener('place_changed', calcularValorSeguro);
 
-    // Permitir digitar livremente sem travar
     coletaInput.addEventListener('input', () => {
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
         document.getElementById('avisoEndereco').innerText = '';
@@ -130,12 +129,14 @@ function initAutocomplete() {
     });
 }
 
-function calcularValor() {
+function calcularValorSeguro() {
     const coletaPlace = autocompleteColeta.getPlace();
     const entregaPlace = autocompleteEntrega.getPlace();
 
-    if (!coletaPlace || !entregaPlace || !coletaPlace.geometry || !entregaPlace.geometry) {
-        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão de endereço válida';
+    // Proteção contra campos inválidos
+    if (!coletaPlace || !coletaPlace.geometry || !entregaPlace || !entregaPlace.geometry) {
+        document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
+        document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão válida!';
         return;
     }
 
@@ -148,17 +149,12 @@ function calcularValor() {
         travelMode: 'DRIVING',
     }, function(response, status){
         if(status === 'OK'){
-            let distanciaMetros = response.rows[0].elements[0].distance.value;
-            let distanciaKm = distanciaMetros / 1000;
-
+            let distanciaKm = response.rows[0].elements[0].distance.value / 1000;
             let valor = 10;
-            if(distanciaKm > 3){
-                valor += (distanciaKm - 3) * 1.8;
-            }
-            valor = valor.toFixed(2);
-            document.getElementById('valorEntrega').innerText = `Valor da entrega: R$${valor}`;
+            if(distanciaKm > 3) valor += (distanciaKm - 3) * 1.8;
+            document.getElementById('valorEntrega').innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
         } else {
-            document.getElementById('avisoEndereco').innerText = 'Não foi possível calcular a distância. Verifique os endereços.';
+            document.getElementById('avisoEndereco').innerText = 'Não foi possível calcular a distância.';
         }
     });
 }
