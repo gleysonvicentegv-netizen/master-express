@@ -1,0 +1,83 @@
+<section style="max-width:500px; width:90%; margin:40px auto; padding:25px; background:#25D366; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); font-family:'Arial', sans-serif; color:white;">
+
+    <!-- Logo -->
+    <div style="text-align:center; margin-bottom:25px;">
+        <img src="logo.png" alt="Master Express" style="width:160px; height:auto;">
+    </div>
+
+    <h2 style="text-align:center; font-size:28px; margin-bottom:25px;">🚀 Solicitar Entrega</h2>
+
+    <form id="pedidoForm">
+
+        <h3 style="margin-bottom:8px;">👤 Dados do Solicitante</h3>
+        <input type="text" id="nomeSolicitante" placeholder="Nome de quem está solicitando" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+        <input type="text" id="telefoneSolicitante" placeholder="Telefone do solicitante" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+
+        <h3 style="margin-bottom:8px;">📍 Endereço de Coleta</h3>
+        <input type="text" id="coleta" placeholder="Endereço completo da coleta" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+
+        <h3 style="margin-bottom:8px;">📦 Endereço de Entrega</h3>
+        <input type="text" id="entrega" placeholder="Endereço completo da entrega" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+
+        <h3 style="margin-bottom:8px;">👥 Dados de Quem Vai Receber</h3>
+        <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+        <input type="text" id="telefoneRecebedor" placeholder="Telefone de quem vai receber" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+        <input type="text" id="pontoReferencia" placeholder="Ponto de referência (ex.: próximo ao mercado)" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+
+        <h3 style="margin-bottom:8px;">💰 Pagamento</h3>
+        <select id="pagamento" required style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;">
+            <option value="">Forma de pagamento</option>
+            <option>Pix</option>
+            <option>Dinheiro</option>
+            <option>Cartão</option>
+            <option>Empresa (Faturado)</option>
+        </select>
+
+        <h3 style="margin-bottom:8px;">📝 Observações Opcionais</h3>
+        <textarea id="info" placeholder="Observações adicionais (opcional)" style="width:100%; padding:14px; margin:6px 0; border-radius:12px; border:none; box-sizing:border-box;"></textarea>
+
+        <button type="submit" style="width:100%; padding:16px; margin-top:12px; background:#FFD700; color:#25D366; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s;">
+            Enviar Pedido via WhatsApp
+        </button>
+    </form>
+</section>
+
+<script>
+document.getElementById("pedidoForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    let nomeSolicitante = document.getElementById("nomeSolicitante").value;
+    let telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
+    let coleta = document.getElementById("coleta").value;
+    let entrega = document.getElementById("entrega").value;
+    let nomeRecebedor = document.getElementById("nomeRecebedor").value;
+    let telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
+    let pontoReferencia = document.getElementById("pontoReferencia").value;
+    let pagamento = document.getElementById("pagamento").value;
+    let info = document.getElementById("info").value;
+
+    let mensagem = 
+`🚀 *NOVO PEDIDO - MASTER EXPRESS*
+
+👤 *Solicitante:* ${nomeSolicitante}
+📞 *Telefone:* ${telefoneSolicitante}
+
+📍 *Coleta:*
+${coleta}
+
+📦 *Entrega:*
+${entrega}
+
+👥 *Recebedor:* ${nomeRecebedor}
+📞 *Telefone do Recebedor:* ${telefoneRecebedor}
+📌 *Ponto de Referência:* ${pontoReferencia}
+
+💰 *Pagamento:* ${pagamento}
+
+📝 *Observações:* ${info ? info : "Não informado"}
+`;
+
+    let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
+    window.open(url, "_blank");
+});
+</script>
