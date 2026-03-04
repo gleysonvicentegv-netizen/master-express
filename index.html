@@ -5,17 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
 <style>
-body { margin:0; padding:0; font-family: Arial,sans-serif; background:#f0f8ff; }
-.container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#d1e7dd; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
+body { margin:0; padding:0; font-family: Arial,sans-serif; background:#e0f7fa; }
+.container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#b2ebf2; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
 .container img { width:160px; display:block; margin:0 auto 25px auto; }
 h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#333; }
 h3 { margin-bottom:8px; }
 input, select, textarea, button { width:100%; padding:14px; margin:6px 0; border-radius:12px; border:1px solid #ccc; box-sizing:border-box; font-size:16px; }
 textarea { resize:none; }
-button { width:100%; padding:16px; margin-top:12px; background:#0d6efd; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
-button:hover { background:#084298; }
-#valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#198754; font-size:18px; }
+button { width:100%; padding:16px; margin-top:12px; background:#00796b; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
+button:hover { background:#004d40; }
+#valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#d32f2f; font-size:18px; }
 #avisoEndereco { color:#FF0000; font-weight:bold; margin-top:8px; display:block; }
+.btn-google { background:#0288d1; margin-top:0; margin-bottom:10px; font-size:16px; }
+.btn-google:hover { background:#01579b; }
 </style>
 </head>
 <body>
@@ -31,12 +33,11 @@ button:hover { background:#084298; }
 
         <h3>📍 Endereço de Coleta</h3>
         <input type="text" id="coleta" placeholder="Digite o endereço completo de coleta" required>
+        <button type="button" class="btn-google" onclick="abrirMaps('coleta')">Pesquisar Endereço no Google Maps</button>
 
         <h3>📦 Endereço de Entrega</h3>
         <input type="text" id="entrega" placeholder="Digite o endereço completo de entrega" required>
-
-        <h3>📏 Distância (km)</h3>
-        <input type="number" id="distancia" placeholder="Informe a distância aproximada em km" required min="0">
+        <button type="button" class="btn-google" onclick="abrirMaps('entrega')">Pesquisar Endereço no Google Maps</button>
 
         <h3>👥 Dados de Quem Vai Receber</h3>
         <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required>
@@ -64,42 +65,50 @@ button:hover { background:#084298; }
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+// Abrir Google Maps em nova aba para ajudar o cliente
+function abrirMaps(campo){
+    const endereco = document.getElementById(campo).value.trim();
+    let url = "https://www.google.com/maps/search/";
+    if(endereco) url += encodeURIComponent(endereco);
+    window.open(url, "_blank");
+}
 
-    function calcularValor(distancia){
-        let valor = 10; // mínimo até 3 km
-        if(distancia > 3) valor += (distancia - 3)*1.8;
-        return valor.toFixed(2);
+// Calcular valor aproximado baseado em distância aproximada digitada pelo cliente
+function calcularValor(distancia){
+    let valor = 10; // mínimo até 3 km
+    if(distancia > 3) valor += (distancia - 3)*1.8;
+    return valor.toFixed(2);
+}
+
+document.getElementById("btnCalcular").addEventListener("click", function(){
+    // Aqui vamos pedir para o cliente digitar a distância aproximada
+    let distancia = prompt("Digite a distância aproximada entre os endereços em km:");
+    distancia = parseFloat(distancia);
+    if(isNaN(distancia) || distancia < 0){
+        document.getElementById("avisoEndereco").innerText = "Distância inválida!";
+        document.getElementById("valorEntrega").innerText = "Valor da entrega: R$0,00";
+        return;
     }
+    document.getElementById("avisoEndereco").innerText = "";
+    const valor = calcularValor(distancia);
+    document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor}`;
+});
 
-    document.getElementById("btnCalcular").addEventListener("click", function(){
-        const distancia = parseFloat(document.getElementById("distancia").value);
-        if(isNaN(distancia) || distancia < 0){
-            document.getElementById("avisoEndereco").innerText = "Por favor, informe uma distância válida!";
-            document.getElementById("valorEntrega").innerText = "Valor da entrega: R$0,00";
-            return;
-        }
-        document.getElementById("avisoEndereco").innerText = "";
-        const valor = calcularValor(distancia);
-        document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor}`;
-    });
+document.getElementById("pedidoForm").addEventListener("submit", function(e){
+    e.preventDefault();
 
-    document.getElementById("pedidoForm").addEventListener("submit", function(e){
-        e.preventDefault();
+    const nomeSolicitante = document.getElementById("nomeSolicitante").value;
+    const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
+    const coleta = document.getElementById("coleta").value;
+    const entrega = document.getElementById("entrega").value;
+    const nomeRecebedor = document.getElementById("nomeRecebedor").value;
+    const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
+    const pontoReferencia = document.getElementById("pontoReferencia").value;
+    const pagamento = document.getElementById("pagamento").value;
+    const info = document.getElementById("info").value;
+    const valor = document.getElementById("valorEntrega").innerText.replace("Valor da entrega: R$", "");
 
-        const nomeSolicitante = document.getElementById("nomeSolicitante").value;
-        const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
-        const coleta = document.getElementById("coleta").value;
-        const entrega = document.getElementById("entrega").value;
-        const distancia = document.getElementById("distancia").value;
-        const nomeRecebedor = document.getElementById("nomeRecebedor").value;
-        const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
-        const pontoReferencia = document.getElementById("pontoReferencia").value;
-        const pagamento = document.getElementById("pagamento").value;
-        const info = document.getElementById("info").value;
-        const valor = calcularValor(parseFloat(distancia));
-
-        const mensagem = 
+    const mensagem = 
 `🚀 *NOVO PEDIDO - MASTER EXPRESS*
 
 👤 *Solicitante:* ${nomeSolicitante}
@@ -107,7 +116,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 📍 *Coleta:* ${coleta}
 📦 *Entrega:* ${entrega}
-📏 *Distância:* ${distancia} km
 
 👥 *Recebedor:* ${nomeRecebedor}
 📞 *Telefone do Recebedor:* ${telefoneRecebedor}
@@ -119,10 +127,8 @@ document.addEventListener("DOMContentLoaded", function() {
 📝 *Observações:* ${info ? info : "Não informado"}
 `;
 
-        const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
-        window.open(url, "_blank");
-    });
-
+    const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
+    window.open(url, "_blank");
 });
 </script>
 
