@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
 
-<!-- Google Maps API -->
+<!-- Google Maps API com a sua chave -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJz-vLi0bfQ3_yIbGS9e_rfujh6LFgW5Q&libraries=places"></script>
 
 <style>
 body { margin:0; padding:0; font-family: Arial,sans-serif; background:#eaeaea; }
 .container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#f4f4f4; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
 .container img { width:160px; display:block; margin:0 auto 25px auto; }
-h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#25D366; }
+h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#333; }
 h3 { margin-bottom:8px; }
 input, select, textarea, button { width:100%; padding:14px; margin:6px 0; border-radius:12px; border:1px solid #ccc; box-sizing:border-box; font-size:16px; }
 textarea { resize:none; }
-button { width:100%; padding:16px; margin-top:12px; background:#25D366; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
-button:hover { background:#1ebe57; }
+button { width:100%; padding:16px; margin-top:12px; background:#555; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
+button:hover { background:#333; }
 #valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#25D366; font-size:18px; }
 #avisoEndereco { color:#FF0000; font-weight:bold; margin-top:8px; display:block; }
 @media (max-width: 400px) { h2 { font-size:24px; } input, select, textarea, button { padding:12px; font-size:15px; } }
@@ -72,9 +72,14 @@ function initAutocomplete() {
     autocompleteColeta = new google.maps.places.Autocomplete(document.getElementById('coleta'), { types: ['geocode'] });
     autocompleteEntrega = new google.maps.places.Autocomplete(document.getElementById('entrega'), { types: ['geocode'] });
 
-    // Enquanto digita, limpa aviso e valor
-    document.getElementById('coleta').addEventListener('input', ()=>{ document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; document.getElementById('avisoEndereco').innerText=''; });
-    document.getElementById('entrega').addEventListener('input', ()=>{ document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; document.getElementById('avisoEndereco').innerText=''; });
+    document.getElementById('coleta').addEventListener('input', ()=>{ 
+        document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; 
+        document.getElementById('avisoEndereco').innerText=''; 
+    });
+    document.getElementById('entrega').addEventListener('input', ()=>{ 
+        document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; 
+        document.getElementById('avisoEndereco').innerText=''; 
+    });
 }
 
 function calcularValorEntrega() {
