@@ -5,64 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Express - Solicitar Entrega</title>
 
-<!-- Google Maps API com Places e Distance Matrix -->
+<!-- Google Maps API -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJz-vLi0bfQ3_yIbGS9e_rfujh6LFgW5Q&libraries=places"></script>
 
 <style>
-body {
-    margin:0;
-    padding:0;
-    font-family: Arial, sans-serif;
-    background:#eaeaea;
-}
-.container {
-    max-width:500px;
-    width:90%;
-    margin:40px auto;
-    padding:25px;
-    background:#f4f4f4;
-    border-radius:20px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.2);
-    color:#333;
-    box-sizing:border-box;
-}
-.container img {
-    width:160px;
-    display:block;
-    margin:0 auto 25px auto;
-}
+body { margin:0; padding:0; font-family: Arial,sans-serif; background:#eaeaea; }
+.container { max-width:500px; width:90%; margin:40px auto; padding:25px; background:#f4f4f4; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2); color:#333; }
+.container img { width:160px; display:block; margin:0 auto 25px auto; }
 h2 { text-align:center; font-size:28px; margin-bottom:25px; color:#25D366; }
 h3 { margin-bottom:8px; }
-input, select, textarea, button {
-    width:100%;
-    padding:14px;
-    margin:6px 0;
-    border-radius:12px;
-    border:1px solid #ccc;
-    box-sizing:border-box;
-    font-size:16px;
-}
+input, select, textarea, button { width:100%; padding:14px; margin:6px 0; border-radius:12px; border:1px solid #ccc; box-sizing:border-box; font-size:16px; }
 textarea { resize:none; }
-button {
-    width:100%;
-    padding:16px;
-    margin-top:12px;
-    background:#25D366;
-    color:white;
-    border:none;
-    border-radius:14px;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
-}
+button { width:100%; padding:16px; margin-top:12px; background:#25D366; color:white; border:none; border-radius:14px; font-size:18px; font-weight:bold; cursor:pointer; transition:0.3s; }
 button:hover { background:#1ebe57; }
 #valorEntrega { font-weight:bold; margin-top:10px; display:block; color:#25D366; font-size:18px; }
 #avisoEndereco { color:#FF0000; font-weight:bold; margin-top:8px; display:block; }
-@media (max-width: 400px) {
-    h2 { font-size:24px; }
-    input, select, textarea, button { padding:12px; font-size:15px; }
-}
+@media (max-width: 400px) { h2 { font-size:24px; } input, select, textarea, button { padding:12px; font-size:15px; } }
 </style>
 </head>
 <body>
@@ -111,55 +69,45 @@ button:hover { background:#1ebe57; }
 let autocompleteColeta, autocompleteEntrega;
 
 function initAutocomplete() {
-    const coletaInput = document.getElementById('coleta');
-    const entregaInput = document.getElementById('entrega');
+    autocompleteColeta = new google.maps.places.Autocomplete(document.getElementById('coleta'), { types: ['geocode'] });
+    autocompleteEntrega = new google.maps.places.Autocomplete(document.getElementById('entrega'), { types: ['geocode'] });
 
-    autocompleteColeta = new google.maps.places.Autocomplete(coletaInput, { types: ['geocode'] });
-    autocompleteEntrega = new google.maps.places.Autocomplete(entregaInput, { types: ['geocode'] });
-
-    // Limpa aviso e valor enquanto digita
-    coletaInput.addEventListener('input', () => {
-        document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
-        document.getElementById('avisoEndereco').innerText = '';
-    });
-    entregaInput.addEventListener('input', () => {
-        document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
-        document.getElementById('avisoEndereco').innerText = '';
-    });
+    // Enquanto digita, limpa aviso e valor
+    document.getElementById('coleta').addEventListener('input', ()=>{ document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; document.getElementById('avisoEndereco').innerText=''; });
+    document.getElementById('entrega').addEventListener('input', ()=>{ document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00'; document.getElementById('avisoEndereco').innerText=''; });
 }
 
-// Função para calcular o valor quando o usuário clicar
 function calcularValorEntrega() {
     const coletaPlace = autocompleteColeta.getPlace();
     const entregaPlace = autocompleteEntrega.getPlace();
 
-    if (!coletaPlace || !coletaPlace.geometry || !entregaPlace || !entregaPlace.geometry) {
+    if(!coletaPlace || !coletaPlace.geometry || !entregaPlace || !entregaPlace.geometry){
         document.getElementById('avisoEndereco').innerText = 'Selecione uma sugestão válida para os dois endereços!';
         document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
         return;
     }
-
     document.getElementById('avisoEndereco').innerText = '';
 
     const service = new google.maps.DistanceMatrixService();
     service.getDistanceMatrix({
         origins: [coletaPlace.formatted_address],
         destinations: [entregaPlace.formatted_address],
-        travelMode: 'DRIVING',
+        travelMode: 'DRIVING'
     }, function(response, status){
-        if(status === 'OK'){
-            let distanciaKm = response.rows[0].elements[0].distance.value / 1000;
-            let valor = 10;
-            if(distanciaKm > 3) valor += (distanciaKm - 3) * 1.8;
-            document.getElementById('valorEntrega').innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
+        if(status==='OK'){
+            let distanciaKm = response.rows[0].elements[0].distance.value/1000;
+            let valor = 10; 
+            if(distanciaKm>3) valor += (distanciaKm-3)*1.8;
+            document.getElementById('valorEntrega').innerText=`Valor da entrega: R$${valor.toFixed(2)}`;
         } else {
-            document.getElementById('avisoEndereco').innerText = 'Não foi possível calcular a distância.';
-            document.getElementById('valorEntrega').innerText = 'Valor da entrega: R$0,00';
+            document.getElementById('avisoEndereco').innerText='Não foi possível calcular a distância.';
+            document.getElementById('valorEntrega').innerText='Valor da entrega: R$0,00';
         }
     });
 }
 
-// Envio do pedido para WhatsApp
+document.getElementById("btnCalcular").addEventListener("click", calcularValorEntrega);
+
 document.getElementById("pedidoForm").addEventListener("submit", function(e){
     e.preventDefault();
 
@@ -196,8 +144,6 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
     let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
     window.open(url, "_blank");
 });
-
-document.getElementById("btnCalcular").addEventListener("click", calcularValorEntrega);
 
 initAutocomplete();
 </script>
