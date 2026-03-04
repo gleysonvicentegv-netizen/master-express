@@ -57,7 +57,6 @@ button:hover { background:#333; }
         <h3>📝 Observações Opcionais</h3>
         <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
 
-        <button type="button" id="btnCalcular">Calcular Valor da Entrega</button>
         <span id="valorEntrega">Valor da entrega: R$0,00</span>
         <span id="avisoEndereco"></span>
 
@@ -73,34 +72,52 @@ document.addEventListener("DOMContentLoaded", function() {
   const APP_ID = 'X3MIO0334P';
   const API_KEY = '37ecfb7772044a530c4e21cc6b512176';
 
+  let latColeta = null, lngColeta = null;
+  let latEntrega = null, lngEntrega = null;
+
+  const coletaInput = document.querySelector('#coleta');
+  const entregaInput = document.querySelector('#entrega');
+
   // Autocomplete Algolia Places
   const placesAutocompleteColeta = places({
     appId: APP_ID,
     apiKey: API_KEY,
-    container: document.querySelector('#coleta')
+    container: coletaInput
+  }).on('change', function(e) {
+      latColeta = e.suggestion.latlng.lat;
+      lngColeta = e.suggestion.latlng.lng;
+      atualizarValor();
   });
 
   const placesAutocompleteEntrega = places({
     appId: APP_ID,
     apiKey: API_KEY,
-    container: document.querySelector('#entrega')
+    container: entregaInput
+  }).on('change', function(e) {
+      latEntrega = e.suggestion.latlng.lat;
+      lngEntrega = e.suggestion.latlng.lng;
+      atualizarValor();
   });
 
-  // Calcular valor da entrega
-  document.getElementById("btnCalcular").addEventListener("click", function() {
-      const coleta = document.getElementById("coleta").value.trim();
-      const entrega = document.getElementById("entrega").value.trim();
+  function calcularDistancia(lat1, lng1, lat2, lng2){
+      const R = 6371; // km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+                Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180) *
+                Math.sin(dLng/2)*Math.sin(dLng/2);
+      const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+  }
 
-      if(!coleta || !entrega){
-          document.getElementById("avisoEndereco").innerText = "Por favor, preencha ambos os endereços!";
-          return;
+  function atualizarValor(){
+      if(latColeta !== null && latEntrega !== null){
+          let distancia = calcularDistancia(latColeta, lngColeta, latEntrega, lngEntrega);
+          let valor = 10; // mínimo até 3 km
+          if(distancia > 3) valor += (distancia - 3)*1.8;
+          document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
       }
-      document.getElementById("avisoEndereco").innerText = "";
-
-      // Valor aproximado: 3km = R$10, km adicional + R$1,80
-      let valor = 10; // mínimo até 3 km
-      document.getElementById("valorEntrega").innerText = `Valor da entrega: R$${valor.toFixed(2)}`;
-  });
+  }
 
   // Envio para WhatsApp
   document.getElementById("pedidoForm").addEventListener("submit", function(e){
@@ -108,14 +125,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
       const nomeSolicitante = document.getElementById("nomeSolicitante").value;
       const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
-      const coleta = document.getElementById("coleta").value;
-      const entrega = document.getElementById("entrega").value;
+      const coleta = coletaInput.value;
+      const entrega = entregaInput.value;
       const nomeRecebedor = document.getElementById("nomeRecebedor").value;
       const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
       const pontoReferencia = document.getElementById("pontoReferencia").value;
       const pagamento = document.getElementById("pagamento").value;
       const info = document.getElementById("info").value;
       const valor = document.getElementById("valorEntrega").innerText.replace('Valor da entrega: R$', '');
+
+      if(!latColeta || !latEntrega){
+          document.getElementById("avisoEndereco").innerText = "Por favor, selecione os endereços usando o autocomplete!";
+          return;
+      }
 
       const mensagem = 
 `🚀 *NOVO PEDIDO - MASTER EXPRESS*
