@@ -3,32 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Express - Pedido de Entrega</title>
+<title>Master Express - Solicitar Entrega</title>
 <style>
 body {
     margin:0; 
     padding:0; 
     font-family: Arial,sans-serif; 
-    background:#fff;
+    background:#fdfdfd;
     overflow-x:hidden;
 }
 
-/* Fundo animado estilo app */
+/* Fundo tipo papel timbrado / leve 3D */
 body::before {
     content:"";
     position:absolute;
     top:0; left:0; right:0; bottom:0;
-    background:
-    radial-gradient(circle at 20% 30%, rgba(0,150,136,0.05) 0%, transparent 70%),
-    radial-gradient(circle at 70% 80%, rgba(255,152,0,0.05) 0%, transparent 70%);
-    animation: moveBg 20s linear infinite;
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
     z-index:0;
-}
-
-@keyframes moveBg {
-    0% {background-position:0 0, 0 0;}
-    50% {background-position:200px 100px, -200px -100px;}
-    100% {background-position:0 0,0 0;}
 }
 
 .container {
@@ -86,11 +80,20 @@ button {
 
 button:hover { background:#004d40; }
 
-button.urgent { background:#d32f2f; margin-top:0; }
-button.urgent:hover { background:#b71c1c; }
+.card { padding:12px; background:#f9f9f9; border-radius:12px; margin-bottom:12px; }
 
-.card { padding:12px; background:#f0f0f0; border-radius:12px; margin-bottom:12px; }
+/* Estilo checkbox */
+.checkbox-container {
+    display:flex;
+    align-items:center;
+    margin:10px 0;
+    font-size:16px;
+}
 
+.checkbox-container input {
+    width:auto;
+    margin-right:10px;
+}
 </style>
 </head>
 <body>
@@ -141,7 +144,11 @@ button.urgent:hover { background:#b71c1c; }
         <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
         </div>
 
-        <button type="button" class="urgent" id="btnUrgente">🚨 Pedido Urgente</button>
+        <div class="checkbox-container">
+            <input type="checkbox" id="urgente">
+            <label for="urgente">🚨 Pedido Urgente</label>
+        </div>
+
         <button type="submit">Enviar Pedido via WhatsApp</button>
     </form>
 </section>
@@ -169,17 +176,6 @@ function usarMinhaLocalizacao(campo){
     }
 }
 
-// Pedido urgente
-let urgente = false;
-document.getElementById("btnUrgente").addEventListener("click", () => {
-    urgente = !urgente;
-    if(urgente) {
-        document.getElementById("btnUrgente").textContent = "🚨 Pedido Urgente ✔";
-    } else {
-        document.getElementById("btnUrgente").textContent = "🚨 Pedido Urgente";
-    }
-});
-
 document.getElementById("pedidoForm").addEventListener("submit", function(e){
     e.preventDefault();
 
@@ -192,6 +188,7 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
     const pontoReferencia = document.getElementById("pontoReferencia").value;
     const pagamento = document.getElementById("pagamento").value;
     const info = document.getElementById("info").value;
+    const urgente = document.getElementById("urgente").checked;
 
     localStorage.setItem('nomeSolicitante', nomeSolicitante);
     localStorage.setItem('telefoneSolicitante', telefoneSolicitante);
