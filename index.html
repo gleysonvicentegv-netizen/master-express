@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +8,6 @@
 
 <link rel="manifest" href="manifest.json">
 
-<meta name="theme-color" content="#25D366">
-
-<link rel="apple-touch-icon" href="logo.png">
-
 <style>
 
 body{
@@ -19,70 +15,69 @@ font-family: Arial;
 background:#f2f2f2;
 margin:0;
 padding:0;
-text-align:center;
 }
 
 .container{
-background:white;
 max-width:500px;
 margin:auto;
+background:white;
 padding:20px;
 border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
 margin-top:20px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 .logo{
+text-align:center;
+}
+
+.logo img{
 width:120px;
-margin-bottom:10px;
 }
 
-h1{
-margin:5px;
+h2{
+text-align:center;
 }
 
-p{
-color:#555;
-}
-
-input,textarea{
+input, textarea{
 width:100%;
-padding:12px;
-margin:8px 0;
-border-radius:8px;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
 border:1px solid #ccc;
 font-size:16px;
 }
 
-textarea{
-resize:none;
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:6px;
+font-size:16px;
+cursor:pointer;
 }
 
-.whatsapp{
-width:100%;
+.pedir{
 background:#25D366;
 color:white;
-border:none;
-padding:15px;
-border-radius:8px;
-font-size:18px;
-cursor:pointer;
-margin-top:10px;
 }
 
-.whatsapp:hover{
-background:#1ebe5d;
-}
-
-.install{
-margin-top:15px;
-background:#333;
+.gps{
+background:#007bff;
 color:white;
-border:none;
-padding:8px 14px;
-border-radius:6px;
-font-size:13px;
-cursor:pointer;
+}
+
+.instalar{
+background:#ff9800;
+color:white;
+}
+
+.footer{
+text-align:center;
+margin-top:15px;
+font-size:14px;
+color:#555;
 }
 
 </style>
@@ -92,33 +87,37 @@ cursor:pointer;
 
 <div class="container">
 
-<img src="logo.png" class="logo">
+<div class="logo">
+<img src="logo.png">
+</div>
 
-<h1>Master Express</h1>
+<h2>Master Express</h2>
 
-<p>Entrega rápida no mesmo dia</p>
-
-<input type="text" id="nome" placeholder="Seu nome" required>
-
-<input type="text" id="telefone" placeholder="Seu telefone" required>
-
-<input type="text" id="retirada" placeholder="Endereço de retirada" required>
-
-<input type="text" id="entrega" placeholder="Endereço de entrega" required>
-
-<input type="text" id="recebedor" placeholder="Nome de quem vai receber">
-
-<input type="text" id="telrecebedor" placeholder="Telefone do recebedor">
-
-<textarea id="descricao" placeholder="Descrição do pedido"></textarea>
-
-<button class="whatsapp" onclick="enviarPedido()">
-Enviar pedido no WhatsApp
+<button class="instalar" id="installBtn">
+📲 Baixar Aplicativo
 </button>
 
-<button class="install" id="btnInstall" style="display:none">
-Baixar App
+<input type="text" id="nome" placeholder="Seu nome">
+
+<input type="text" id="telefone" placeholder="Telefone">
+
+<input type="text" id="origem" placeholder="Endereço de coleta">
+
+<button class="gps" onclick="pegarLocalizacao()">
+📍 Usar minha localização
 </button>
+
+<input type="text" id="destino" placeholder="Endereço de entrega">
+
+<textarea id="detalhes" placeholder="Detalhes do pedido (opcional)"></textarea>
+
+<button class="pedir" onclick="enviarPedido()">
+🚀 Solicitar Entrega
+</button>
+
+<div class="footer">
+Entrega rápida em Macaé
+</div>
 
 </div>
 
@@ -128,67 +127,64 @@ function enviarPedido(){
 
 let nome = document.getElementById("nome").value
 let telefone = document.getElementById("telefone").value
-let retirada = document.getElementById("retirada").value
-let entrega = document.getElementById("entrega").value
-let recebedor = document.getElementById("recebedor").value
-let telrecebedor = document.getElementById("telrecebedor").value
-let descricao = document.getElementById("descricao").value
+let origem = document.getElementById("origem").value
+let destino = document.getElementById("destino").value
+let detalhes = document.getElementById("detalhes").value
 
-let mensagem = 
-"📦 *NOVO PEDIDO MASTER EXPRESS*\n\n"+
-"👤 Cliente: "+nome+"\n"+
-"📞 Telefone: "+telefone+"\n\n"+
-"📍 Retirada: "+retirada+"\n"+
-"🏠 Entrega: "+entrega+"\n\n"+
-"👥 Recebedor: "+recebedor+"\n"+
-"📞 Tel Recebedor: "+telrecebedor+"\n\n"+
-"📄 Descrição:\n"+descricao
+let mensagem =
+`🚀 *NOVO PEDIDO MASTER EXPRESS*
 
-let url = "https://wa.me/5522992150249?text="+encodeURIComponent(mensagem)
+👤 Nome: ${nome}
 
-window.open(url,'_blank')
+📞 Telefone: ${telefone}
+
+📍 Coleta:
+${origem}
+
+📦 Entrega:
+${destino}
+
+📝 Detalhes:
+${detalhes}`
+
+let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem)
+
+window.open(url)
 
 }
 
-</script>
+function pegarLocalizacao(){
 
-<script>
+navigator.geolocation.getCurrentPosition(function(pos){
 
-let deferredPrompt;
+let lat = pos.coords.latitude
+let lon = pos.coords.longitude
+
+let link = `https://maps.google.com/?q=${lat},${lon}`
+
+document.getElementById("origem").value = link
+
+})
+
+}
+
+let deferredPrompt
 
 window.addEventListener('beforeinstallprompt', (e) => {
 
-e.preventDefault();
+e.preventDefault()
 
-deferredPrompt = e;
+deferredPrompt = e
 
-document.getElementById("btnInstall").style.display = "inline-block";
+document.getElementById("installBtn").style.display = "block"
 
-});
+})
 
-document.getElementById("btnInstall").addEventListener("click", async () => {
+document.getElementById("installBtn").addEventListener("click", () => {
 
-if(deferredPrompt){
+deferredPrompt.prompt()
 
-deferredPrompt.prompt();
-
-const choiceResult = await deferredPrompt.userChoice;
-
-deferredPrompt = null;
-
-}
-
-});
-
-</script>
-
-<script>
-
-if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("sw.js")
-
-}
+})
 
 </script>
 
