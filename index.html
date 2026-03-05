@@ -1,191 +1,279 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Express - Solicitar Entrega</title>
 
-<title>Master Express</title>
-
+<!-- Manifest PWA -->
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00796b">
 
 <style>
-
-body{
-font-family: Arial;
-background:#f2f2f2;
-margin:0;
-padding:0;
+body {
+    margin:0; 
+    padding:0; 
+    font-family: Arial,sans-serif; 
+    background:#fdfdfd;
+    overflow-x:hidden;
 }
 
-.container{
-max-width:500px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-margin-top:20px;
+/* Fundo tipo papel timbrado / leve 3D */
+body::before {
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index:0;
 }
 
-.logo{
-text-align:center;
+.container {
+    position: relative;
+    max-width:500px;
+    width:95%;
+    margin:30px auto;
+    padding:25px;
+    background:#ffffffcc;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    z-index:1;
 }
 
-.logo img{
-width:120px;
+.container img {
+    width:140px;
+    display:block;
+    margin:0 auto 20px auto;
 }
 
-h2{
-text-align:center;
+h2 {
+    text-align:center;
+    font-size:28px;
+    margin-bottom:20px;
+    color:#333;
 }
 
-input, textarea{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:16px;
+h3 { margin-bottom:8px; }
+
+input, select, textarea, button {
+    width:100%;
+    padding:14px;
+    margin:6px 0;
+    border-radius:12px;
+    border:1px solid #ccc;
+    font-size:16px;
+    box-sizing:border-box;
 }
 
-button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:6px;
-font-size:16px;
-cursor:pointer;
+textarea { resize:none; }
+
+button {
+    width:100%;
+    padding:16px;
+    margin-top:12px;
+    background:#00796b;
+    color:white;
+    border:none;
+    border-radius:14px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
 }
 
-.pedir{
-background:#25D366;
-color:white;
+button:hover { background:#004d40; }
+
+.card { padding:12px; background:#f9f9f9; border-radius:12px; margin-bottom:12px; }
+
+/* Estilo checkbox */
+.checkbox-container {
+    display:flex;
+    align-items:center;
+    margin:10px 0;
+    font-size:16px;
 }
 
-.gps{
-background:#007bff;
-color:white;
+.checkbox-container input {
+    width:auto;
+    margin-right:10px;
 }
 
-.instalar{
-background:#ff9800;
-color:white;
+/* Botão PWA discreto no canto */
+#pwaContainer {
+    position:fixed;
+    top:10px;
+    right:10px;
+    z-index:1000;
 }
 
-.footer{
-text-align:center;
-margin-top:15px;
-font-size:14px;
-color:#555;
+#btnPWA {
+    background:#ff9800;
+    color:white;
+    font-size:14px;
+    padding:8px 12px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
 }
-
+#btnPWA:hover {
+    background:#f57c00;
+}
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-<div class="logo">
-<img src="logo.png">
+<!-- Botão PWA discreto -->
+<div id="pwaContainer">
+    <button id="btnPWA">📥 Baixar App</button>
 </div>
 
-<h2>Master Express</h2>
+<section class="container">
+    <img src="logo.png" alt="Master Express">
+    <h2>🚀 Solicitar Entrega</h2>
 
-<button class="instalar" id="installBtn">
-📲 Baixar Aplicativo
-</button>
+    <form id="pedidoForm">
+        <div class="card">
+        <h3>👤 Dados do Solicitante</h3>
+        <input type="text" id="nomeSolicitante" placeholder="Nome de quem está solicitando" required>
+        <input type="text" id="telefoneSolicitante" placeholder="Telefone do solicitante" required>
+        </div>
 
-<input type="text" id="nome" placeholder="Seu nome">
+        <div class="card">
+        <h3>📍 Endereço de Coleta</h3>
+        <input type="text" id="coleta" placeholder="Digite o endereço completo de coleta" required>
+        <button type="button" onclick="usarMinhaLocalizacao('coleta')">📍 Usar minha localização</button>
+        </div>
 
-<input type="text" id="telefone" placeholder="Telefone">
+        <div class="card">
+        <h3>📦 Endereço de Entrega</h3>
+        <input type="text" id="entrega" placeholder="Digite o endereço completo de entrega" required>
+        <button type="button" onclick="usarMinhaLocalizacao('entrega')">📍 Usar minha localização</button>
+        </div>
 
-<input type="text" id="origem" placeholder="Endereço de coleta">
+        <div class="card">
+        <h3>👥 Dados de Quem Vai Receber</h3>
+        <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required>
+        <input type="text" id="telefoneRecebedor" placeholder="Telefone de quem vai receber" required>
+        <input type="text" id="pontoReferencia" placeholder="Ponto de referência" required>
+        </div>
 
-<button class="gps" onclick="pegarLocalizacao()">
-📍 Usar minha localização
-</button>
+        <div class="card">
+        <h3>💰 Pagamento</h3>
+        <select id="pagamento" required>
+            <option value="">Forma de pagamento</option>
+            <option>Pix</option>
+            <option>Dinheiro</option>
+            <option>Cartão</option>
+            <option>Empresa (Faturado)</option>
+        </select>
+        </div>
 
-<input type="text" id="destino" placeholder="Endereço de entrega">
+        <div class="card">
+        <h3>📝 Observações Opcionais</h3>
+        <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
+        </div>
 
-<textarea id="detalhes" placeholder="Detalhes do pedido (opcional)"></textarea>
+        <div class="checkbox-container">
+            <input type="checkbox" id="urgente">
+            <label for="urgente">🚨 Pedido Urgente</label>
+        </div>
 
-<button class="pedir" onclick="enviarPedido()">
-🚀 Solicitar Entrega
-</button>
-
-<div class="footer">
-Entrega rápida em Macaé
-</div>
-
-</div>
+        <button type="submit">Enviar Pedido via WhatsApp</button>
+    </form>
+</section>
 
 <script>
+// Salvar dados do cliente
+window.addEventListener('load', () => {
+    const nome = localStorage.getItem('nomeSolicitante');
+    const telefone = localStorage.getItem('telefoneSolicitante');
+    if(nome) document.getElementById('nomeSolicitante').value = nome;
+    if(telefone) document.getElementById('telefoneSolicitante').value = telefone;
+});
 
-function enviarPedido(){
-
-let nome = document.getElementById("nome").value
-let telefone = document.getElementById("telefone").value
-let origem = document.getElementById("origem").value
-let destino = document.getElementById("destino").value
-let detalhes = document.getElementById("detalhes").value
-
-let mensagem =
-`🚀 *NOVO PEDIDO MASTER EXPRESS*
-
-👤 Nome: ${nome}
-
-📞 Telefone: ${telefone}
-
-📍 Coleta:
-${origem}
-
-📦 Entrega:
-${destino}
-
-📝 Detalhes:
-${detalhes}`
-
-let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem)
-
-window.open(url)
-
+function usarMinhaLocalizacao(campo){
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            document.getElementById(campo).value = `https://maps.google.com/?q=${lat},${lng}`;
+        }, error => {
+            alert("Não foi possível obter sua localização.");
+        });
+    } else {
+        alert("Seu navegador não suporta geolocalização.");
+    }
 }
 
-function pegarLocalizacao(){
+document.getElementById("pedidoForm").addEventListener("submit", function(e){
+    e.preventDefault();
 
-navigator.geolocation.getCurrentPosition(function(pos){
+    const nomeSolicitante = document.getElementById("nomeSolicitante").value;
+    const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
+    const coleta = document.getElementById("coleta").value;
+    const entrega = document.getElementById("entrega").value;
+    const nomeRecebedor = document.getElementById("nomeRecebedor").value;
+    const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
+    const pontoReferencia = document.getElementById("pontoReferencia").value;
+    const pagamento = document.getElementById("pagamento").value;
+    const info = document.getElementById("info").value;
+    const urgente = document.getElementById("urgente").checked;
 
-let lat = pos.coords.latitude
-let lon = pos.coords.longitude
+    localStorage.setItem('nomeSolicitante', nomeSolicitante);
+    localStorage.setItem('telefoneSolicitante', telefoneSolicitante);
 
-let link = `https://maps.google.com/?q=${lat},${lon}`
+    let mensagem = `🚀 *NOVO PEDIDO - MASTER EXPRESS*\n\n`;
+    if(urgente) mensagem += "⚠️ *PRIORIDADE: URGENTE*\n\n";
 
-document.getElementById("origem").value = link
+    mensagem +=
+`👤 *Solicitante:* ${nomeSolicitante}
+📞 *Telefone:* ${telefoneSolicitante}
 
-})
+📍 *Coleta:* ${coleta}
+📦 *Entrega:* ${entrega}
 
-}
+👥 *Recebedor:* ${nomeRecebedor}
+📞 *Telefone do Recebedor:* ${telefoneRecebedor}
+📌 *Ponto de Referência:* ${pontoReferencia}
 
-let deferredPrompt
+💰 *Pagamento:* ${pagamento}
+
+📝 *Observações:* ${info ? info : "Não informado"}
+`;
+
+    const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
+    window.open(url, "_blank");
+});
+
+// PWA: Prompt "Baixar App"
+let deferredPrompt;
+const btnPWA = document.getElementById('btnPWA');
 
 window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnPWA.style.display = 'inline-block'; 
+});
 
-e.preventDefault()
+btnPWA.addEventListener('click', async () => {
+    if(deferredPrompt){
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+    } else {
+        alert("Abra este site em seu navegador e use 'Adicionar à tela inicial'.");
+    }
+});
 
-deferredPrompt = e
-
-document.getElementById("installBtn").style.display = "block"
-
-})
-
-document.getElementById("installBtn").addEventListener("click", () => {
-
-deferredPrompt.prompt()
-
-})
-
+// Registrar Service Worker
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(() => {
+        console.log('Service Worker registrado');
+    });
+}
 </script>
 
 </body>
