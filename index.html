@@ -1,235 +1,257 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Master Express - Entregas rápidas em Macaé, transporte de documentos e encomendas.">
+<meta name="description" content="Master Express - Entregas rápidas em Macaé">
 
-<!-- META TAGS PARA EVITAR CACHE ANTIGO -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<title>Master Express</title>
 
-<title>Master Express | Entregas Rápidas em Macaé</title>
+<link rel="manifest" href="manifest.json">
 
 <style>
-/* Reset e fontes */
-body, html { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #f4f4f4; color: #333; }
-h1,h2,h3 { margin: 0; }
-a { text-decoration: none; }
 
-/* HERO APP STYLE COM FORMULÁRIO NO TOPO */
-header.hero {
-    background: url('https://images.unsplash.com/photo-1605902711622-cfb43c4437b1') no-repeat center center/cover;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#f5f5f5;
+color:#333;
 }
 
-header.hero .overlay {
-    background-color: rgba(0,0,0,0.8);
-    width: 100%;
-    max-width: 500px;
-    padding: 30px 20px 50px 20px;
-    border-radius: 15px;
-    text-align: center;
-    color: white;
+header{
+background:#111;
+color:white;
+padding:20px;
+text-align:center;
 }
 
-header.hero h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
+header h1{
+margin:0;
+font-size:28px;
 }
 
-header.hero p {
-    font-size: 18px;
-    margin-bottom: 20px;
+.container{
+max-width:500px;
+margin:auto;
+padding:20px;
 }
 
-/* FORMULÁRIO ESTILO APP */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: rgba(255,255,255,0.95);
-    padding: 20px;
-    border-radius: 10px;
-    color: black;
-    position: relative;
-    margin-top: 15px;
+form{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.15);
+display:flex;
+flex-direction:column;
+gap:10px;
 }
 
-input, select, textarea, button {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    width: 100%;
+input,select,textarea{
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+width:100%;
 }
 
-button {
-    background: #ffcc00;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
+textarea{
+resize:none;
 }
 
-button:hover { transform: scale(1.02); }
-
-/* SEÇÕES ABAIXO DO FORMULÁRIO */
-section { padding: 40px 20px; max-width: 1000px; margin: auto; }
-
-h2 { text-align: center; margin-bottom: 30px; position: relative; }
-h2::after { content: ''; display: block; width: 60px; height: 3px; background: #ffcc00; margin: 10px auto 0; border-radius: 2px; }
-
-/* CARDS ESTILO APP */
-.services, .benefits {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap: 20px;
+button{
+padding:14px;
+border:none;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    transition: transform 0.3s, box-shadow 0.3s;
+.enviar{
+background:#25d366;
+color:white;
 }
 
-.card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.25); }
-
-/* BOTÃO FIXO WHATSAPP */
-#whatsappBtn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #25d366;
-    color: white;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: transform 0.3s;
+.installBtn{
+margin-top:10px;
+background:#007bff;
+color:white;
+display:none;
 }
 
-#whatsappBtn:hover { transform: scale(1.1); }
-
-/* FOOTER */
-footer {
-    background: #111;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    margin-top: 40px;
+.urgente{
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:5px;
 }
+
+footer{
+text-align:center;
+padding:20px;
+margin-top:30px;
+background:#111;
+color:white;
+}
+
+/* botão whatsapp flutuante */
+
+#whatsappBtn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25d366;
+color:white;
+border-radius:50%;
+width:60px;
+height:60px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:30px;
+box-shadow:0 4px 12px rgba(0,0,0,0.3);
+text-decoration:none;
+}
+
 </style>
 </head>
+
 <body>
 
-<header class="hero">
-    <div class="overlay">
-        <h1>🚀 Master Express</h1>
-        <p>Entregas rápidas e seguras em Macaé</p>
-        
-        <form id="pedidoForm">
-            <input type="text" id="nomeSolicitante" placeholder="Seu nome" required>
-            <input type="text" id="telefoneSolicitante" placeholder="Seu telefone" required>
-            <input type="text" id="coleta" placeholder="Endereço de coleta" required>
-            <input type="text" id="entrega" placeholder="Endereço de entrega" required>
-            <input type="text" id="nomeRecebedor" placeholder="Nome do recebedor" required>
-            <input type="text" id="telefoneRecebedor" placeholder="Telefone do recebedor" required>
-            <select id="pagamento" required>
-                <option value="">Forma de pagamento</option>
-                <option>Pix</option>
-                <option>Dinheiro</option>
-                <option>Cartão</option>
-                <option>Empresa (Faturado)</option>
-            </select>
-            <textarea id="info" placeholder="Observações (opcional)"></textarea>
-            <button type="submit">Enviar Pedido via WhatsApp</button>
-        </form>
-    </div>
+<header>
+<h1>🚀 Master Express</h1>
+<p>Entregas rápidas em Macaé</p>
 </header>
 
-<section>
-    <h2>Serviços</h2>
-    <div class="services">
-        <div class="card">📄 Transporte de Documentos</div>
-        <div class="card">🛍️ Entregas Comerciais</div>
-        <div class="card">🏠 Entregas Particulares</div>
-    </div>
-</section>
+<div class="container">
 
-<section>
-    <h2>Diferenciais</h2>
-    <div class="benefits">
-        <div class="card">✔ Atendimento rápido</div>
-        <div class="card">✔ Pontualidade</div>
-        <div class="card">✔ Segurança</div>
-        <div class="card">✔ Cobertura em Macaé</div>
-        <div class="card">✔ Atendimento via WhatsApp</div>
-    </div>
-</section>
+<form id="pedidoForm">
 
-<section>
-    <h2>Área de Atendimento</h2>
-    <p>Centro, Imboassica, Cavaleiros, Praia Campista, Parque Aeroporto, Ajuda e demais bairros de Macaé.</p>
-</section>
+<input type="text" id="nomeSolicitante" placeholder="Seu nome" required>
 
-<!-- BOTÃO FIXO WHATSAPP -->
+<input type="text" id="telefoneSolicitante" placeholder="Seu telefone" required>
+
+<input type="text" id="coleta" placeholder="Endereço de coleta" required>
+
+<input type="text" id="entrega" placeholder="Endereço de entrega" required>
+
+<input type="text" id="nomeRecebedor" placeholder="Nome do recebedor" required>
+
+<input type="text" id="telefoneRecebedor" placeholder="Telefone do recebedor" required>
+
+<select id="pagamento" required>
+<option value="">Forma de pagamento</option>
+<option>Pix</option>
+<option>Dinheiro</option>
+<option>Cartão</option>
+<option>Empresa (Faturado)</option>
+</select>
+
+<div class="urgente">
+<input type="checkbox" id="urgente">
+<label>Pedido urgente</label>
+</div>
+
+<textarea id="info" placeholder="Observações"></textarea>
+
+<button class="enviar" type="submit">
+Enviar Pedido via WhatsApp
+</button>
+
+<button class="installBtn" id="installBtn">
+📥 Baixar App
+</button>
+
+</form>
+
+</div>
+
 <a id="whatsappBtn" href="https://wa.me/5522992150249" target="_blank">📲</a>
 
-<script>
-document.getElementById("pedidoForm").addEventListener("submit", function(e){
-    e.preventDefault();
-
-    let nome = document.getElementById("nomeSolicitante").value;
-    let tel = document.getElementById("telefoneSolicitante").value;
-    let coleta = document.getElementById("coleta").value;
-    let entrega = document.getElementById("entrega").value;
-    let nomeRec = document.getElementById("nomeRecebedor").value;
-    let telRec = document.getElementById("telefoneRecebedor").value;
-    let pagamento = document.getElementById("pagamento").value;
-    let info = document.getElementById("info").value;
-
-    let msg = 
-`🚀 *NOVO PEDIDO - MASTER EXPRESS*
-
-👤 *Solicitante:* ${nome}
-📞 *Telefone:* ${tel}
-
-📍 *Coleta:* ${coleta}
-
-📦 *Entrega:* ${entrega}
-
-👥 *Recebedor:* ${nomeRec}
-📞 *Telefone do Recebedor:* ${telRec}
-
-💰 *Pagamento:* ${pagamento}
-
-📝 *Observações:* ${info ? info : "Não informado"}
-`;
-
-    let url = "https://wa.me/5522992150249?text=" + encodeURIComponent(msg);
-    window.open(url, "_blank");
-});
-</script>
-
 <footer>
-    <p>📞 (22) 99215-0249</p>
-    <p>Master Express – Sua entrega em boas mãos</p>
+
+<p>📞 (22) 99215-0249</p>
+<p>Master Express</p>
+
 </footer>
+
+<script>
+
+/* ENVIAR PEDIDO */
+
+document.getElementById("pedidoForm").addEventListener("submit",function(e){
+
+e.preventDefault()
+
+let nome=document.getElementById("nomeSolicitante").value
+let tel=document.getElementById("telefoneSolicitante").value
+let coleta=document.getElementById("coleta").value
+let entrega=document.getElementById("entrega").value
+let nomeRec=document.getElementById("nomeRecebedor").value
+let telRec=document.getElementById("telefoneRecebedor").value
+let pagamento=document.getElementById("pagamento").value
+let info=document.getElementById("info").value
+let urgente=document.getElementById("urgente").checked
+
+let msg=`🚀 *NOVO PEDIDO - MASTER EXPRESS*
+
+👤 Solicitante: ${nome}
+📞 Telefone: ${tel}
+
+📍 Coleta: ${coleta}
+
+📦 Entrega: ${entrega}
+
+👥 Recebedor: ${nomeRec}
+📞 Telefone: ${telRec}
+
+💰 Pagamento: ${pagamento}
+
+⚡ Urgente: ${urgente ? "SIM" : "Não"}
+
+📝 Observações: ${info || "Nenhuma"}
+`
+
+let url="https://wa.me/5522992150249?text="+encodeURIComponent(msg)
+
+window.open(url,"_blank")
+
+})
+
+/* INSTALAR APP */
+
+let deferredPrompt
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+
+e.preventDefault()
+
+deferredPrompt=e
+
+document.getElementById("installBtn").style.display="block"
+
+})
+
+document.getElementById("installBtn").addEventListener("click",async()=>{
+
+if(deferredPrompt){
+
+deferredPrompt.prompt()
+
+}
+
+})
+
+/* SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("sw.js")
+
+}
+
+</script>
 
 </body>
 </html>
