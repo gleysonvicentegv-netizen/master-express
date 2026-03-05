@@ -100,9 +100,23 @@ button:hover { background:#004d40; }
     margin-right:10px;
 }
 
-/* Botão PWA */
+/* Botão PWA discreto no canto */
+#pwaContainer {
+    position:fixed;
+    top:10px;
+    right:10px;
+    z-index:1000;
+}
+
 #btnPWA {
     background:#ff9800;
+    color:white;
+    font-size:14px;
+    padding:8px 12px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 2px 5px rgba(0,0,0,0.2);
 }
 #btnPWA:hover {
     background:#f57c00;
@@ -110,6 +124,11 @@ button:hover { background:#004d40; }
 </style>
 </head>
 <body>
+
+<!-- Botão PWA discreto -->
+<div id="pwaContainer">
+    <button id="btnPWA">📥 Baixar App</button>
+</div>
 
 <section class="container">
     <img src="logo.png" alt="Master Express">
@@ -163,7 +182,6 @@ button:hover { background:#004d40; }
         </div>
 
         <button type="submit">Enviar Pedido via WhatsApp</button>
-        <button type="button" id="btnPWA">📲 Adicionar à Tela Inicial</button>
     </form>
 </section>
 
@@ -230,24 +248,20 @@ document.getElementById("pedidoForm").addEventListener("submit", function(e){
     window.open(url, "_blank");
 });
 
-// PWA: Prompt "Adicionar à tela inicial"
+// PWA: Prompt "Baixar App"
 let deferredPrompt;
 const btnPWA = document.getElementById('btnPWA');
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    btnPWA.style.display = 'block';
+    btnPWA.style.display = 'inline-block'; 
 });
 
 btnPWA.addEventListener('click', async () => {
     if(deferredPrompt){
         deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if(choiceResult.outcome === 'accepted'){
-            console.log('Usuário aceitou o PWA');
-        } else {
-            console.log('Usuário recusou o PWA');
-        }
+        await deferredPrompt.userChoice;
         deferredPrompt = null;
     } else {
         alert("Abra este site em seu navegador e use 'Adicionar à tela inicial'.");
@@ -261,5 +275,6 @@ if('serviceWorker' in navigator){
     });
 }
 </script>
+
 </body>
 </html>
