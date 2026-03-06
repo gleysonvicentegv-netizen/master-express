@@ -3,277 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Express - Solicitar Entrega</title>
 
-<!-- Manifest PWA -->
+<title>Master Express</title>
+
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00796b">
 
 <style>
-body {
-    margin:0; 
-    padding:0; 
-    font-family: Arial,sans-serif; 
-    background:#fdfdfd;
-    overflow-x:hidden;
+
+body{
+font-family:Arial, sans-serif;
+margin:0;
+background:#2c2c2c;
+color:white;
+text-align:center;
 }
 
-/* Fundo tipo papel timbrado / leve 3D */
-body::before {
-    content:"";
-    position:absolute;
-    top:0; left:0; right:0; bottom:0;
-    background-image: 
-      linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index:0;
+header{
+padding:20px;
 }
 
-.container {
-    position: relative;
-    max-width:500px;
-    width:95%;
-    margin:30px auto;
-    padding:25px;
-    background:#ffffffcc;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.1);
-    z-index:1;
+.logo{
+width:120px;
 }
 
-.container img {
-    width:140px;
-    display:block;
-    margin:0 auto 20px auto;
+.container{
+padding:20px;
+max-width:600px;
+margin:auto;
 }
 
-h2 {
-    text-align:center;
-    font-size:28px;
-    margin-bottom:20px;
-    color:#333;
+input,textarea{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+font-size:16px;
 }
 
-h3 { margin-bottom:8px; }
-
-input, select, textarea, button {
-    width:100%;
-    padding:14px;
-    margin:6px 0;
-    border-radius:12px;
-    border:1px solid #ccc;
-    font-size:16px;
-    box-sizing:border-box;
+button{
+margin-top:15px;
+padding:14px;
+width:100%;
+border:none;
+border-radius:8px;
+font-size:18px;
+background:#27ae60;
+color:white;
+cursor:pointer;
 }
 
-textarea { resize:none; }
-
-button {
-    width:100%;
-    padding:16px;
-    margin-top:12px;
-    background:#00796b;
-    color:white;
-    border:none;
-    border-radius:14px;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
+#map{
+height:300px;
+margin-top:20px;
+border-radius:10px;
 }
 
-button:hover { background:#004d40; }
-
-.card { padding:12px; background:#f9f9f9; border-radius:12px; margin-bottom:12px; }
-
-/* Estilo checkbox */
-.checkbox-container {
-    display:flex;
-    align-items:center;
-    margin:10px 0;
-    font-size:16px;
+.valor{
+font-size:22px;
+margin-top:15px;
+font-weight:bold;
 }
 
-.checkbox-container input {
-    width:auto;
-    margin-right:10px;
-}
-
-/* Botão PWA discreto no canto */
-#pwaContainer {
-    position:fixed;
-    top:10px;
-    right:10px;
-    z-index:1000;
-}
-
-#btnPWA {
-    background:#ff9800;
-    color:white;
-    font-size:14px;
-    padding:8px 12px;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-    box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
-#btnPWA:hover {
-    background:#f57c00;
-}
 </style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
+
 <body>
 
-<!-- Botão PWA discreto -->
-<div id="pwaContainer">
-    <button id="btnPWA">📥 Baixar App</button>
+<header>
+<img src="logo.png" class="logo">
+<h2>Master Express</h2>
+<p>Entrega rápida em Macaé</p>
+</header>
+
+<div class="container">
+
+<h3>Quem está enviando</h3>
+
+<input id="nomeRemetente" placeholder="Seu nome">
+
+<input id="telefoneRemetente" placeholder="Seu telefone">
+
+<h3>Quem vai receber</h3>
+
+<input id="nomeDestinatario" placeholder="Nome de quem recebe">
+
+<input id="telefoneDestinatario" placeholder="Telefone de quem recebe">
+
+<input id="enderecoDestino" placeholder="Endereço de entrega">
+
+<textarea id="obs" placeholder="Observações (opcional)"></textarea>
+
+<div id="map"></div>
+
+<div class="valor">
+Valor estimado: <span id="valorEntrega">R$10,00</span>
 </div>
 
-<section class="container">
-    <img src="logo.png" alt="Master Express">
-    <h2>🚀 Solicitar Entrega</h2>
+<button onclick="enviarPedido()">Solicitar entrega</button>
 
-    <form id="pedidoForm">
-        <div class="card">
-        <h3>👤 Dados do Solicitante</h3>
-        <input type="text" id="nomeSolicitante" placeholder="Nome de quem está solicitando" required>
-        <input type="text" id="telefoneSolicitante" placeholder="Telefone do solicitante" required>
-        </div>
+</div>
 
-        <div class="card">
-        <h3>📍 Endereço de Coleta</h3>
-        <input type="text" id="coleta" placeholder="Digite o endereço completo de coleta" required>
-        <button type="button" onclick="usarMinhaLocalizacao('coleta')">📍 Usar minha localização</button>
-        </div>
-
-        <div class="card">
-        <h3>📦 Endereço de Entrega</h3>
-        <input type="text" id="entrega" placeholder="Digite o endereço completo de entrega" required>
-        <button type="button" onclick="usarMinhaLocalizacao('entrega')">📍 Usar minha localização</button>
-        </div>
-
-        <div class="card">
-        <h3>👥 Dados de Quem Vai Receber</h3>
-        <input type="text" id="nomeRecebedor" placeholder="Nome de quem vai receber" required>
-        <input type="text" id="telefoneRecebedor" placeholder="Telefone de quem vai receber" required>
-        <input type="text" id="pontoReferencia" placeholder="Ponto de referência" required>
-        </div>
-
-        <div class="card">
-        <h3>💰 Pagamento</h3>
-        <select id="pagamento" required>
-            <option value="">Forma de pagamento</option>
-            <option>Pix</option>
-            <option>Dinheiro</option>
-            <option>Cartão</option>
-            <option>Empresa (Faturado)</option>
-        </select>
-        </div>
-
-        <div class="card">
-        <h3>📝 Observações Opcionais</h3>
-        <textarea id="info" placeholder="Observações adicionais (opcional)"></textarea>
-        </div>
-
-        <div class="checkbox-container">
-            <input type="checkbox" id="urgente">
-            <label for="urgente">🚨 Pedido Urgente</label>
-        </div>
-
-        <button type="submit">Enviar Pedido via WhatsApp</button>
-    </form>
-</section>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// Salvar dados do cliente
-window.addEventListener('load', () => {
-    const nome = localStorage.getItem('nomeSolicitante');
-    const telefone = localStorage.getItem('telefoneSolicitante');
-    if(nome) document.getElementById('nomeSolicitante').value = nome;
-    if(telefone) document.getElementById('telefoneSolicitante').value = telefone;
-});
 
-function usarMinhaLocalizacao(campo){
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(position => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            document.getElementById(campo).value = `https://maps.google.com/?q=${lat},${lng}`;
-        }, error => {
-            alert("Não foi possível obter sua localização.");
-        });
-    } else {
-        alert("Seu navegador não suporta geolocalização.");
-    }
+let mapa = L.map('map').setView([-22.3768,-41.7848],13)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(mapa)
+
+let marcadorColeta = L.marker([-22.3768,-41.7848],{draggable:true}).addTo(mapa)
+let marcadorEntrega = L.marker([-22.3800,-41.7900],{draggable:true}).addTo(mapa)
+
+function calcularDistancia(lat1,lon1,lat2,lon2){
+
+let R=6371
+
+let dLat=(lat2-lat1)*Math.PI/180
+let dLon=(lon2-lon1)*Math.PI/180
+
+let a=
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)*Math.sin(dLon/2)
+
+let c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
+
+return R*c
 }
 
-document.getElementById("pedidoForm").addEventListener("submit", function(e){
-    e.preventDefault();
+function calcularValor(){
 
-    const nomeSolicitante = document.getElementById("nomeSolicitante").value;
-    const telefoneSolicitante = document.getElementById("telefoneSolicitante").value;
-    const coleta = document.getElementById("coleta").value;
-    const entrega = document.getElementById("entrega").value;
-    const nomeRecebedor = document.getElementById("nomeRecebedor").value;
-    const telefoneRecebedor = document.getElementById("telefoneRecebedor").value;
-    const pontoReferencia = document.getElementById("pontoReferencia").value;
-    const pagamento = document.getElementById("pagamento").value;
-    const info = document.getElementById("info").value;
-    const urgente = document.getElementById("urgente").checked;
+let c = marcadorColeta.getLatLng()
+let e = marcadorEntrega.getLatLng()
 
-    localStorage.setItem('nomeSolicitante', nomeSolicitante);
-    localStorage.setItem('telefoneSolicitante', telefoneSolicitante);
+let distancia = calcularDistancia(c.lat,c.lng,e.lat,e.lng)
 
-    let mensagem = `🚀 *NOVO PEDIDO - MASTER EXPRESS*\n\n`;
-    if(urgente) mensagem += "⚠️ *PRIORIDADE: URGENTE*\n\n";
+let valor = 10
 
-    mensagem +=
-`👤 *Solicitante:* ${nomeSolicitante}
-📞 *Telefone:* ${telefoneSolicitante}
+if(distancia > 3){
 
-📍 *Coleta:* ${coleta}
-📦 *Entrega:* ${entrega}
+valor = 10 + ((distancia - 3) * 1.80)
 
-👥 *Recebedor:* ${nomeRecebedor}
-📞 *Telefone do Recebedor:* ${telefoneRecebedor}
-📌 *Ponto de Referência:* ${pontoReferencia}
-
-💰 *Pagamento:* ${pagamento}
-
-📝 *Observações:* ${info ? info : "Não informado"}
-`;
-
-    const url = "https://wa.me/5522992150249?text=" + encodeURIComponent(mensagem);
-    window.open(url, "_blank");
-});
-
-// PWA: Prompt "Baixar App"
-let deferredPrompt;
-const btnPWA = document.getElementById('btnPWA');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    btnPWA.style.display = 'inline-block'; 
-});
-
-btnPWA.addEventListener('click', async () => {
-    if(deferredPrompt){
-        deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-        deferredPrompt = null;
-    } else {
-        alert("Abra este site em seu navegador e use 'Adicionar à tela inicial'.");
-    }
-});
-
-// Registrar Service Worker
-if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').then(() => {
-        console.log('Service Worker registrado');
-    });
 }
+
+document.getElementById("valorEntrega").innerText =
+"R$" + valor.toFixed(2)
+
+}
+
+marcadorColeta.on("dragend",calcularValor)
+marcadorEntrega.on("dragend",calcularValor)
+
+calcularValor()
+
+function enviarPedido(){
+
+let nomeR = document.getElementById("nomeRemetente").value
+let telR = document.getElementById("telefoneRemetente").value
+
+let nomeD = document.getElementById("nomeDestinatario").value
+let telD = document.getElementById("telefoneDestinatario").value
+
+let obs = document.getElementById("obs").value
+
+let c = marcadorColeta.getLatLng()
+let e = marcadorEntrega.getLatLng()
+
+let valor = document.getElementById("valorEntrega").innerText
+
+let msg =
+"📦 NOVA ENTREGA\n\n"+
+"Remetente: "+nomeR+"\n"+
+"Telefone: "+telR+"\n\n"+
+"Destinatário: "+nomeD+"\n"+
+"Telefone: "+telD+"\n\n"+
+"Valor: "+valor+"\n\n"+
+"Observação: "+obs+"\n\n"+
+"Coleta:\nhttps://maps.google.com/?q="+c.lat+","+c.lng+
+"\n\nEntrega:\nhttps://maps.google.com/?q="+e.lat+","+e.lng
+
+let url =
+"https://wa.me/5522992150249?text="+
+encodeURIComponent(msg)
+
+window.open(url)
+
+}
+
 </script>
 
 </body>
